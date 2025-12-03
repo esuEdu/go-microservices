@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"order-service/internal/model"
+	"order-service/internal/rabbit"
 )
 
 func OrderHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,6 +31,11 @@ func createOrder(w http.ResponseWriter, r *http.Request) {
 
 	order := model.NewOrder(req.UserId, req.ProductId, req.Price)
 
-	fmt.Fprintf(w, "Order created: %+v\n", order)
+	if err := rabbit.PublishOrder(order); err != nil {
+		http.Error(w, "failed to publish order: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "order created and sent to queue")
 
 }
