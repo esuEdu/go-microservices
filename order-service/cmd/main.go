@@ -6,11 +6,19 @@ import (
 	"net/http"
 	"order-service/internal/api"
 	"order-service/internal/rabbit"
+	"os"
 )
 
 func main() {
 
-	err := rabbit.ConnectRabbitMQ("amqp://guest:guest@localhost:5672/")
+	rabbitURL := fmt.Sprintf(
+		"amqp://%s:%s@%s:5672/",
+		os.Getenv("RABBITMQ_USER"),
+		os.Getenv("RABBITMQ_PASS"),
+		os.Getenv("RABBITMQ_HOST"),
+	)
+
+	err := rabbit.ConnectRabbitMQ(rabbitURL)
 	if err != nil {
 		log.Fatal("RabbitMQ connection error:", err)
 	}
